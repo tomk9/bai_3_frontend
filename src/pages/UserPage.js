@@ -4,7 +4,8 @@ import Grid from "@material-ui/core/Grid";
 import TextField from "@material-ui/core/TextField";
 import Chip from "@material-ui/core/Chip";
 import Button from "@material-ui/core/Button";
-import Tooltip from "@material-ui/core/Tooltip";
+import MenuItem from "@material-ui/core/MenuItem";
+import Select from "@material-ui/core/Select";
 import Typography from "@material-ui/core/Typography";
 import axios from "axios";
 
@@ -15,7 +16,8 @@ class UserPage extends Component {
       error: "",
       newPassword: "",
       repPassword: "",
-      password: ""
+      password: "",
+      value: props.data.block_after
     };
   }
 
@@ -29,7 +31,6 @@ class UserPage extends Component {
   onClick = event => {
     const { user, token } = this.props;
     const { newPassword, repPassword, password } = this.state;
-    const value = event.target.value;
     if (newPassword === repPassword) {
       axios({
         method: "post",
@@ -53,18 +54,26 @@ class UserPage extends Component {
             // console.log("Response 200");
             if (response.data.name !== undefined) {
               this.setState({
-                value: value,
-                error: ""
+                error: "",
+                newPassword: "",
+                repPassword: "",
+                password: ""
               });
             } else {
               // console.log(response.data.info);
               this.setState({
-                error: response.data.info || "Something wrong"
+                error: response.data.info || "Something wrong",
+                newPassword: "",
+                repPassword: "",
+                password: ""
               });
             }
           } else {
             this.setState({
-              error: "Something wrong"
+              error: "Something wrong",
+              newPassword: "",
+              repPassword: "",
+              password: ""
             });
           }
         })
@@ -72,14 +81,20 @@ class UserPage extends Component {
           // console.log(error.response.status);
           if (error.response.status === 401) {
             this.setState({
-              error: error.response.statusText
+              error: error.response.statusText,
+              newPassword: "",
+              repPassword: "",
+              password: ""
             });
           } else {
             this.setState({
               error:
                 error.response !== undefined
                   ? error.response.data.error
-                  : error.toString()
+                  : error.toString(),
+              newPassword: "",
+              repPassword: "",
+              password: ""
             });
           }
         });
@@ -106,9 +121,65 @@ class UserPage extends Component {
     });
   };
 
+  _onSelect = event => {
+    const { user, token } = this.props;
+    const value = event.target.value;
+
+    axios({
+      baseURL: "http://localhost:5000/Ps15.php",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Access-Control-Allow-Origin": "*",
+        Authentication: token
+      },
+      auth: {
+        username: user
+      },
+      params: {
+        par: value
+      }
+    })
+      .then(response => {
+        // console.log(response);
+        if (response.status === 200) {
+          // console.log("Response 200");
+          if (response.data.name !== undefined) {
+            this.setState({
+              value: value,
+              error: ""
+            });
+          } else {
+            // console.log(response.data.info);
+            this.setState({
+              error: response.data.info || "Something wrong"
+            });
+          }
+        } else {
+          this.setState({
+            error: "Something wrong"
+          });
+        }
+      })
+      .catch(error => {
+        // console.log(error.response.status);
+        if (error.response.status === 401) {
+          this.setState({
+            error: error.response.statusText
+          });
+        } else {
+          this.setState({
+            error:
+              error.response !== undefined
+                ? error.response.data.error
+                : error.toString()
+          });
+        }
+      });
+  };
+
   render() {
-    const { user } = this.props;
-    const { error } = this.state;
+    const { data } = this.props;
+    const { error, newPassword, repPassword, password, value } = this.state;
     return (
       <Card>
         <Grid
@@ -120,8 +191,36 @@ class UserPage extends Component {
           style={{ padding: 40 }}
         >
           <Grid item>
-            <Typography variant="title" color="inherit">
-              {user}
+            <Typography variant="h3" color="inherit">
+              {data.name}
+            </Typography>
+          </Grid>
+          <Grid item>
+            <Typography variant="body1" color="inherit">
+              Last login: {data.last_login}
+            </Typography>
+          </Grid>
+          <Grid item>
+            <Typography variant="body1" color="inherit">
+              Last failed login: {data.last_failed_login}
+            </Typography>
+          </Grid>
+          <Grid item>
+            <Typography variant="body1" color="inherit">
+              Failed attemps login: {data.failed_attemps_login}
+            </Typography>
+          </Grid>
+          <Grid item>
+            <Typography variant="body1" color="inherit">
+              Block after:
+              <Select value={value} onChange={this._onSelect}>
+                <MenuItem value="3">3</MenuItem>
+                <MenuItem value="4">4</MenuItem>
+                <MenuItem value="5">5</MenuItem>
+                <MenuItem value="6">6</MenuItem>
+                <MenuItem value="7">7</MenuItem>
+              </Select>
+              failed attemps
             </Typography>
           </Grid>
           <Grid item>
@@ -129,19 +228,25 @@ class UserPage extends Component {
               autoFocus
               placeholder="old password"
               onChange={event => this.onChangePass(event)}
+              value={password}
+              type="password"
             />
           </Grid>
           <Grid item>
             <TextField
               placeholder="new password"
               onChange={event => this.onChangeNew(event)}
+              value={newPassword}
+              type="password"
             />
           </Grid>
           <Grid item>
-              <TextField
-                placeholder="repeat new password"
-                onChange={event => this.onChangeRep(event)}
-              />
+            <TextField
+              placeholder="repeat new password"
+              onChange={event => this.onChangeRep(event)}
+              value={repPassword}
+              type="password"
+            />
           </Grid>
           <Grid item>{error && <Chip color="secondary" label={error} />}</Grid>
           <Grid item>

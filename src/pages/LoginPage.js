@@ -1,4 +1,4 @@
-import React, { Component, Fragment } from "react";
+import React, { Component } from "react";
 import Card from "@material-ui/core/Card";
 import Grid from "@material-ui/core/Grid";
 import TextField from "@material-ui/core/TextField";
@@ -169,31 +169,21 @@ class LoginPage extends Component {
     }
   };
   onChangeOne = (event, index) => {
-    const { answers, password } = this.state;
-    // for (let i = index + 1; i < 16; i++) {
-    //   if (answers.includes(`${i}`)) {
-    //     this.setState({
-    //       actualField: i
-    //     });
-    //     break;
-    //   }
-    // }
+    const { password } = this.state;
     password[index] = event.target.value;
     this.setState({
       password
     });
   };
   renderAnswer = (item, index) => {
-    const { actualField, answers } = this.state;
+    const { answers } = this.state;
     const chosenFields = answers.includes(`${index}`);
     const StyledTextField = withStyles({
       root: {
         background: "linear-gradient(45deg, silver 30%, grey 90%)"
       }
     })(TextField);
-    const focusUsernameInputField = input => {
-      input && input.focus();
-    };
+
     if (chosenFields) {
       return (
         <TextField
@@ -204,6 +194,7 @@ class LoginPage extends Component {
           }}
           variant="outlined"
           onChange={event => this.onChangeOne(event, index)}
+          type="password"
         />
       );
     } else {
@@ -215,6 +206,7 @@ class LoginPage extends Component {
             size: 1
           }}
           variant="outlined"
+          type="password"
         />
       );
     }
