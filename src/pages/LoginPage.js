@@ -107,6 +107,8 @@ class LoginPage extends Component {
           });
         break;
       case 1:
+        const canEditOnlyNamesNewLabels = password.map(value => value && value);
+        const canEditObjectFinal = Object.assign({}, canEditOnlyNamesNewLabels);
         axios({
           baseURL: "http://localhost:5000/Ps13.php",
           headers: {
@@ -114,9 +116,10 @@ class LoginPage extends Component {
             "Access-Control-Allow-Origin": "*"
           },
           auth: {
-            username: login,
-            password: password.join("")
-          }
+            username: login
+            // password: password.join("")
+          },
+          params: canEditObjectFinal
         })
           .then(response => {
             console.log(response);
